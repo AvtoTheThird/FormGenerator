@@ -3,38 +3,11 @@ import "./App.css";
 // import SyntaxHighlighter from "react-syntax-highlighter";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Field, formSettings, componentType, stateType, types } from "./common";
 
-interface Field {
-  name: string;
-  polaceholder: string;
-  lable: boolean;
-  labelValue: string;
-  type: types;
-  required: boolean;
-  state: boolean;
-}
-interface formSettings {
-  generateState: boolean;
-  componentType: componentType;
-  stateType: stateType;
-}
-
-enum stateType {
-  multiple = "multiple",
-  singleObject = "single Object",
-}
-enum componentType {
-  functional = "functional",
-  class = "class",
-}
-enum types {
-  text = "text",
-  number = "number",
-  email = "email",
-  password = "password",
-}
 function App() {
   const [form, setForm] = useState([] as Field[]);
+  const [editing, setEditing] = useState<boolean>(false);
   const [formSetings, setFormSettings] = useState<formSettings>({
     generateState: true,
     componentType: componentType.functional,
@@ -48,7 +21,7 @@ function App() {
     labelValue: "",
     type: types.text,
     required: false,
-    state: false,
+    state: true,
   });
   const defaultValues = {
     name: "",
@@ -59,6 +32,11 @@ function App() {
     required: false,
     state: false,
   };
+  function toCamelCase(str: string) {
+    return str
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+  }
 
   function handleAdd() {
     setForm([...form, currentField]);
@@ -73,58 +51,34 @@ function App() {
       : generateStateObject();
 
     generateCode();
-  }, [form]);
+  }, [form, formSetings]);
 
   const generateStateObject = () => {
     setCode((prev) =>
       prev.concat(
         `const [formData, setFormData] = useState({\n${form.map((field) => {
-          return field.name + ':""\n';
+          return toCamelCase(field.name) + ':""\n';
         })}})`
       )
     );
   };
-  // console.log(code);
-
   const generateState = () => {
     form.map((field, index) => {
       setCode((prev) =>
         prev.concat(
-          `const [${field.name}, set${
-            field.name.charAt(0).toUpperCase() + field.name.slice(1)
+          // field.name.charAt(0).toUpperCase() + field.name.slice(1)
+          `const [${toCamelCase(field.name)}, set${
+            toCamelCase(field.name).charAt(0).toUpperCase() +
+            toCamelCase(field.name).slice(1)
           }] = useState("")\n`
         )
       );
     });
   };
   const generateCode = () => {
-    // setCode("import React from 'react';\nimport { useState } from 'react';\n");
-
-    // setCode(code.concat(state));
-
-    // setCode(
-    //   code.concat(
-    //     `const [formData, setFormData] = useState({${form.map((field) => {
-    //       field.name + ':""';
-    //     })}})`
-    //   )
-    // );
-
-    // form.map((field, index) => {
-    //   setCode(
-    //     code.concat(`
-    //     const [${field.name}, set${
-    //       field.name.charAt(0).toUpperCase() + field.name.slice(1)
-    //     }] = useState("")
-
-    //         `)
-    //   );
-    // });
-
     form.map((field, index) => {
       setCode((prev) =>
         prev.concat(`//${field.name} input
-        // ${index} 
         <div>
             ${
               field.lable
@@ -135,11 +89,21 @@ function App() {
           field.required ? "required" : ""
         }              ${
           field.state
-            ? `
+            ? formSetings.stateType === stateType.multiple
+              ? `
             onChange={(e) => {
             set${
-              field.name.charAt(0).toUpperCase() + field.name.slice(1)
-            }({ ...FormData, name: e.target.value });
+              toCamelCase(field.name).charAt(0).toUpperCase() +
+              toCamelCase(field.name).slice(1)
+            }(e.target.value)
+          }}
+            `
+              : `
+            onChange={(e) => {
+           set${
+             toCamelCase(field.name).charAt(0).toUpperCase() +
+             toCamelCase(field.name).slice(1)
+           }({ ...FormData, name: e.target.value });
           }}`
             : ""
         }/>
@@ -147,7 +111,6 @@ function App() {
       );
     });
   };
-  // console.log(formSetings);
 
   return (
     <>
@@ -275,7 +238,49 @@ function App() {
         </div>
       </div>
       <button onClick={handleAdd}>ADD</button>
-
+      <div className="window-continer">
+        {form.map((field, index) => {
+          return (
+            <div className="window" key={index}>
+              <p>name:{field.name}</p>
+              <p>placeholder:{field.polaceholder}</p>
+              <p>label:{field.lable ? "true" : "false"}</p>
+              {field.lable ? <p>labelValue:{field.labelValue}</p> : null}
+              <p>type:{field.type}</p>
+              <p>required:{field.required ? "true" : "false"}</p>
+              <p>state:{field.state ? "true" : "fasle"}</p>
+              <div>
+                <button
+                  onClick={() => {
+                    setEditing(!editing);
+                  }}
+                >
+                  {editing ? "save" : "edit"}
+                </button>
+                <button
+                  onClick={() => {
+                    const newArray = [...form];
+                    newArray.splice(index, 1);
+                    setForm(newArray);
+                  }}
+                >
+                  delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {/* 
+        <div className="window">
+          <p>name:name</p>
+          <p>placeholder:placeholder</p>
+          <p>label:label</p>
+          <p>labelValue:labelValue</p>
+          <p>type:type</p>
+          <p>required:required</p>
+          <p>state:state</p>
+        </div> */}
+      </div>
       <div>
         <SyntaxHighlighter
           language="jsx"

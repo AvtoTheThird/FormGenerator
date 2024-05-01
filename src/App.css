@@ -1,6 +1,22 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
+  padding: 0;
   padding: 2rem;
   text-align: center;
+}
+.window {
+  width: 200px;
+  height: 200px;
+  border: 1px solid black;
+  flex: 0 0 auto;
+}
+p {
+  margin: 5px;
+}
+
+.window-continer {
+  overflow-x: auto;
+  display: flex;
+  gap: 1rem;
 }
