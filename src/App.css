@@ -7,7 +7,7 @@
 }
 .window {
   width: 200px;
-  height: 200px;
+  height: 240px;
   border: 1px solid black;
   flex: 0 0 auto;
 }
@@ -16,7 +16,13 @@ p {
 }
 
 .window-continer {
+  height: 250px;
   overflow-x: auto;
   display: flex;
   gap: 1rem;
+}
+.window-field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

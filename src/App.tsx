@@ -8,6 +8,7 @@ import { Field, formSettings, componentType, stateType, types } from "./common";
 function App() {
   const [form, setForm] = useState([] as Field[]);
   const [editing, setEditing] = useState<boolean>(false);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [formSetings, setFormSettings] = useState<formSettings>({
     generateState: true,
     componentType: componentType.functional,
@@ -114,6 +115,7 @@ function App() {
 
   return (
     <>
+      {/* form setings */}
       <div style={{ border: "1px solid black", padding: "10px" }}>
         <h2>form settings</h2>
 
@@ -150,6 +152,7 @@ function App() {
           <option value={stateType.singleObject}> single object</option>
         </select>
       </div>
+      {/* field settings */}
       <div style={{ border: "1px solid black", padding: "10px" }}>
         <h2>add fields</h2>{" "}
         <div>
@@ -242,20 +245,173 @@ function App() {
         {form.map((field, index) => {
           return (
             <div className="window" key={index}>
-              <p>name:{field.name}</p>
-              <p>placeholder:{field.polaceholder}</p>
-              <p>label:{field.lable ? "true" : "false"}</p>
-              {field.lable ? <p>labelValue:{field.labelValue}</p> : null}
+              <div className="window-field">
+                name:
+                {editing && index === editingIndex ? (
+                  <input
+                    type="text"
+                    placeholder="name"
+                    required
+                    value={form[index].name}
+                    onChange={(e) => {
+                      const newArr = form.map((field, indexi) => {
+                        if (indexi === index) {
+                          return {
+                            ...field,
+                            name: e.target.value,
+                          };
+                        }
+                        return field;
+                      });
+                      setForm(newArr);
+                    }}
+                  />
+                ) : (
+                  <p>{field.name}</p>
+                )}
+              </div>
+              <div className="window-field">
+                <p>placeholder:</p>
+                {editing && index === editingIndex ? (
+                  <input
+                    type="text"
+                    placeholder="polaceholder"
+                    required
+                    value={form[index].polaceholder}
+                    // value={currentField.polaceholder}
+                    onChange={(e) => {
+                      const newArr = form.map((field, indexi) => {
+                        if (indexi === index) {
+                          return {
+                            ...field,
+                            polaceholder: e.target.value,
+                          };
+                        }
+                        return field;
+                      });
+                      setForm(newArr);
+
+                      // setCurrentField({
+                      //   ...currentField,
+                      //   polaceholder: e.target.value,
+                      // });
+                    }}
+                  />
+                ) : (
+                  <p>{field.polaceholder}</p>
+                )}
+              </div>
+
+              <div className="window-field">
+                label:
+                {editing && index === editingIndex ? (
+                  <input
+                    type="checkbox"
+                    name="label"
+                    checked={form[index].lable}
+                    required
+                    onChange={() => {
+                      setForm(
+                        form.map((field, index) => {
+                          if (index === index) {
+                            return {
+                              ...field,
+                              lable: !field.lable,
+                            };
+                          }
+                          return field;
+                        })
+                      );
+                    }}
+                  />
+                ) : (
+                  <p>{field.lable ? "true" : "false"}</p>
+                )}
+              </div>
+              {field.lable ? (
+                editing && index === editingIndex ? (
+                  <input
+                    type="text"
+                    name="label text"
+                    value={form[index].labelValue}
+                    onChange={(e) => {
+                      setForm(
+                        form.map((field, indexi) => {
+                          if (indexi === index) {
+                            return {
+                              ...field,
+                              labelValue: e.target.value,
+                            };
+                          }
+                          return field;
+                        })
+                      );
+                    }}
+                  />
+                ) : (
+                  <p>labelValue:{field.labelValue}</p>
+                )
+              ) : null}
               <p>type:{field.type}</p>
-              <p>required:{field.required ? "true" : "false"}</p>
-              <p>state:{field.state ? "true" : "fasle"}</p>
+              <div className="window-field">
+                required:
+                {editing && index === editingIndex ? (
+                  <input
+                    type="checkbox"
+                    name="required"
+                    checked={form[index].required}
+                    onChange={() =>
+                      setForm(
+                        form.map((field, index) => {
+                          if (index === index) {
+                            return {
+                              ...field,
+                              required: !field.required,
+                            };
+                          }
+                          return field;
+                        })
+                      )
+                    }
+                  />
+                ) : (
+                  <p>{field.required ? "true" : "false"}</p>
+                )}
+              </div>
+              <div className="window-field">
+                state:
+                {editing && index === editingIndex ? (
+                  <input
+                    type="checkbox"
+                    checked={form[index].state}
+                    name="state"
+                    id=""
+                    onChange={() => {
+                      setForm(
+                        form.map((field, index) => {
+                          if (index === index) {
+                            return {
+                              ...field,
+                              state: !field.state,
+                            };
+                          }
+                          return field;
+                        })
+                      );
+                    }}
+                  />
+                ) : (
+                  <p>{field.state ? "true" : "fasle"}</p>
+                )}
+              </div>
               <div>
                 <button
                   onClick={() => {
                     setEditing(!editing);
+                    setEditingIndex(index);
                   }}
                 >
-                  {editing ? "save" : "edit"}
+                  {editing && editingIndex ? "save" : "edit"}
                 </button>
                 <button
                   onClick={() => {
